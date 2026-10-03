@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>معمل الجود الذكي للكيمياء | تفاعلي وتنافسي</title>
+  <meta name="description" content="معمل افتراضي تفاعلي وتنافسي لتعليم الكيمياء لطالبات الصف الأول متوسط بمناسبة أسبوع الكيمياء">
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Cairo & Tajawal -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons via CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Canvas Confetti via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+    }
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .transform-style-3d {
+      transform-style: preserve-3d;
+    }
+    .backface-hidden {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+    @keyframes bubbleFloat {
+      0% { transform: translateY(100%) scale(0.6); opacity: 0; }
+      20% { opacity: 0.8; }
+      80% { opacity: 0.9; }
+      100% { transform: translateY(-20px) scale(1.1); opacity: 0; }
+    }
+    @keyframes flameFlicker {
+      0%, 100% { transform: scaleY(1) scaleX(1); filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.8)); }
+      25% { transform: scaleY(1.08) scaleX(0.96) skewX(-1deg); filter: drop-shadow(0 0 14px rgba(59, 130, 246, 0.9)); }
+      50% { transform: scaleY(0.94) scaleX(1.04) skewX(1deg); filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.85)); }
+      75% { transform: scaleY(1.06) scaleX(0.97) skewX(-0.5deg); filter: drop-shadow(0 0 16px rgba(6, 182, 212, 0.95)); }
+    }
+    .animate-flame { animation: flameFlicker 0.4s infinite ease-in-out; }
+  </style>
+<script src="/_aistudio-iframe.js?v=2c34bde1"></script></head>
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col antialiased selection:bg-purple-600 selection:text-white">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-[#0f172a]/90 backdrop-blur-md border-b border-violet-900/40 shadow-lg shadow-purple-950/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-cyan-500 p-0.5 shadow-md flex items-center justify-center">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+            <i data-lucide="flask-conical" class="w-6 h-6 text-cyan-400"></i>
+          </div>
+        </div>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-black bg-gradient-to-r from-purple-300 via-violet-100 to-cyan-300 bg-clip-text text-transparent">
+            معمل الجود الذكي للكيمياء
+          </h1>
+          <p class="text-xs text-purple-300/80 font-medium hidden sm:block">تفاعلي وتنافسي · أسبوع الكيمياء المدرسي</p>
+        </div>
+      </div>
+
+      <!-- Mode Tabs -->
+      <nav class="flex items-center gap-1.5 p-1 bg-slate-900/80 border border-slate-800 rounded-xl">
+        <button id="tab-btn-lab" onclick="switchMainTab('lab')" class="tab-btn flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md">
+          <i data-lucide="flask-conical" class="w-4 h-4 text-cyan-300"></i>
+          <span>المعمل الافتراضي</span>
+        </button>
+        <button id="tab-btn-quiz" onclick="switchMainTab('quiz')" class="tab-btn flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200">
+          <i data-lucide="trophy" class="w-4 h-4 text-amber-300"></i>
+          <span>تحدي الكيمياء</span>
+        </button>
+        <button id="tab-btn-facts" onclick="switchMainTab('facts')" class="tab-btn flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200">
+          <i data-lucide="lightbulb" class="w-4 h-4 text-yellow-300"></i>
+          <span>حقائق إثرائية</span>
+        </button>
+      </nav>
+
+      <!-- Sound Toggle -->
+      <button id="sound-btn" onclick="toggleMute()" class="p-2.5 rounded-xl border border-slate-800 bg-slate-900 text-slate-300 hover:text-cyan-400 transition-colors" title="كتم/تشغيل الصوت">
+        <i id="sound-icon" data-lucide="volume-2" class="w-5 h-5 text-cyan-400"></i>
+      </button>
+
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden pt-8 pb-10 border-b border-slate-800/80 bg-gradient-to-b from-[#10172d] via-[#0d1222] to-[#0b0f19]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="max-w-3xl space-y-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-950/60 border border-purple-500/30 text-purple-300 text-xs sm:text-sm font-semibold">
+          <i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i>
+          <span>أسبوع الكيمياء المدرسي 2026 · الصف الأول متوسط</span>
+        </div>
+        <h2 class="text-3xl sm:text-5xl font-black text-white leading-tight">
+          معمل الجود الذكي للكيمياء
+        </h2>
+        <p class="text-slate-300 text-base sm:text-lg leading-relaxed">
+          منصة محاكاة تفاعلية مصممة خصيصاً لطالبات الصف الأول متوسط لخوض تجارب علمية آمنة 100%، وخوض تحدي المسابقة الكيميائية لنيل وسام التميز!
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-8">
+    
+    <!-- SECTION 1: Virtual Lab -->
+    <div id="section-lab" class="space-y-6">
+      
+      <!-- Sub-tabs for experiments -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2.5 backdrop-blur-md">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="flex items-center gap-2 px-3 py-1">
+            <i data-lucide="atom" class="w-5 h-5 text-cyan-400"></i>
+            <span class="text-sm font-black text-white">اختر التجربة الافتراضية:</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full sm:w-auto">
+            <button id="exp-tab-ph" onclick="switchExperiment('ph')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md">
+              1. كاشف الأحماض و pH
+            </button>
+            <button id="exp-tab-gas" onclick="switchExperiment('gas')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-950 text-slate-300 hover:text-white border border-slate-800">
+              2. الفوران وتصاعد الغاز
+            </button>
+            <button id="exp-tab-matter" onclick="switchExperiment('matter')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-950 text-slate-300 hover:text-white border border-slate-800">
+              3. حالات المادة والحرارة
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Experiment 1: pH Experiment -->
+      <div id="exp-container-ph" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-7 bg-slate-900/60 border border-slate-800 rounded-2xl p-6 backdrop-blur-md flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-4">
+            <span id="ph-substance-title" class="text-sm font-bold text-white">عصير ليمون طازج (حمض الستريك)</span>
+            <button onclick="resetPHExperiment()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium">إعادة ضبط الكأس</button>
+          </div>
+
+          <div class="relative py-8 flex flex-col items-center justify-center min-h-[300px]">
+            <div id="ph-flask-liquid" class="w-48 sm:w-56 h-60 border-2 border-slate-500/40 rounded-b-3xl rounded-t-md overflow-hidden bg-slate-950/40 shadow-2xl flex flex-col justify-end transition-all duration-700">
+              <div id="ph-fluid" class="w-full h-1/2 bg-red-600/80 transition-all duration-700 flex items-center justify-center">
+                <span id="ph-badge" class="text-xs font-black text-white px-2.5 py-1 rounded bg-slate-950/70 border border-white/20">pH 2.2</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-800 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-slate-400">أضيفي قطرات من الكاشف لملاحظة اللون</span>
+              <button onclick="addPHDrop()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-xs sm:text-sm shadow-md">إضافة قطرة بالقطارة 💧</button>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-2 p-2.5 bg-slate-950 rounded-xl border border-slate-800">
+              <span class="text-xs text-slate-300">اختبار تباع الشمس:</span>
+              <div class="flex gap-2">
+                <button onclick="dipLitmus('red')" class="px-3 py-1 rounded bg-rose-950 border border-rose-800 text-rose-300 text-xs font-bold">ورقة حمراء 🔴</button>
+                <button onclick="dipLitmus('blue')" class="px-3 py-1 rounded bg-blue-950 border border-blue-800 text-blue-300 text-xs font-bold">ورقة زرقاء 🔵</button>
+              </div>
+            </div>
+            <div id="litmus-result-msg" class="text-xs font-bold text-center text-cyan-300 min-h-[16px]"></div>
+          </div>
+
+          <div class="mt-4 p-4 rounded-xl bg-slate-950/70 border border-slate-800">
+            <div class="flex justify-between text-xs text-slate-300 mb-2">
+              <span class="text-rose-400 font-bold">0 (حمض قوي)</span>
+              <span class="text-purple-300 font-bold">7 (متعادل)</span>
+              <span class="text-cyan-400 font-bold">14 (قاعدة قوية)</span>
+            </div>
+            <div class="relative h-4 rounded-full overflow-hidden p-0.5 bg-slate-800">
+              <div class="w-full h-full rounded-full" style="background: linear-gradient(to left, #eab308, #22c55e, #06b6d4, #3b82f6, #8b5cf6, #ec4899, #ef4444);"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 space-y-4">
+          <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5">
+            <h4 class="text-sm font-bold text-slate-200 mb-3">اختاري المادة المراد فحصها:</h4>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="selectPHSubstance('lemon', 2.2, 'rgba(239, 68, 68, 0.85)', 'حمض قوي', 'عصير ليمون طازج')" class="p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-right hover:border-purple-500">
+                <div class="text-xs font-bold text-white">عصير ليمون</div>
+                <div class="text-[10px] text-rose-400">حمض قوي (pH 2.2)</div>
+              </button>
+              <button onclick="selectPHSubstance('vinegar', 2.9, 'rgba(244, 63, 94, 0.85)', 'حمض متوسط', 'خل المائدة')" class="p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-right hover:border-purple-500">
+                <div class="text-xs font-bold text-white">خل المائدة</div>
+                <div class="text-[10px] text-rose-400">حمض متوسط (pH 2.9)</div>
+              </button>
+              <button onclick="selectPHSubstance('water', 7.0, 'rgba(147, 51, 234, 0.85)', 'متعادل', 'ماء نقي مقطر')" class="p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-right hover:border-purple-500">
+                <div class="text-xs font-bold text-white">ماء نقي مقطر</div>
+                <div class="text-[10px] text-purple-400">متعادل كيميائياً (pH 7.0)</div>
+              </button>
+              <button onclick="selectPHSubstance('soap', 8.8, 'rgba(14, 165, 233, 0.85)', 'قاعدة خفيفة', 'محلول صابون')" class="p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-right hover:border-purple-500">
+                <div class="text-xs font-bold text-white">محلول صابون</div>
+                <div class="text-[10px] text-cyan-400">قاعدة خفيفة (pH 8.8)</div>
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-gradient-to-br from-purple-950/50 to-slate-900 border border-purple-800/40 rounded-2xl p-5 space-y-3">
+            <span class="text-xs font-bold text-cyan-300">الاستنتاج العلمي (الصف الأول متوسط):</span>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              الأحماض مركبات تطلق أيونات الهيدروجين (H+) ويكون رقمها الهيدروجيني أقل من 7، بينما القواعد تطلق أيونات الهيدروكسيد (OH-) ورقمها الهيدروجيني أكبر من 7. المادة المتعادلة كالماء النقي تساوي 7 تماماً.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Experiment 2: Gas Effervescence Container -->
+      <div id="exp-container-gas" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-7 bg-slate-900/60 border border-slate-800 rounded-2xl p-6 backdrop-blur-md flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-sm font-bold text-white">تفاعل كربونات الصوديوم مع حمض الخليك</span>
+            <button onclick="resetGasReaction()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs">إعادة التجربة</button>
+          </div>
+
+          <div class="relative py-8 flex flex-col items-center justify-center min-h-[320px]">
+            <div id="balloon" class="w-12 h-14 bg-pink-600 rounded-full border border-pink-400 transition-all duration-1000 flex items-center justify-center text-[10px] text-white font-bold"></div>
+            <div class="w-6 h-3 bg-pink-700 rounded-b -mt-1"></div>
+            <div class="w-48 h-56 border-2 border-slate-400/50 rounded-b-3xl rounded-t bg-slate-950/40 flex flex-col justify-end p-2 relative overflow-hidden">
+              <div id="gas-liquid" class="w-full h-24 bg-cyan-400/60 rounded-b-2xl transition-all duration-500 relative flex items-center justify-center">
+                <span class="text-xs font-bold text-slate-900">خل المائدة</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-800 flex justify-between items-center">
+            <span id="gas-status" class="text-xs text-amber-300 font-bold">جاهز للإضافة</span>
+            <button id="add-powder-btn" onclick="triggerGasReaction()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 text-white font-bold text-xs sm:text-sm shadow-md">إضافة بيكربونات الصوديوم 🧪</button>
+          </div>
+
+          <!-- Gas Confirmation Tests -->
+          <div id="gas-tests-box" class="hidden mt-3 p-3 rounded-xl bg-slate-950 border border-cyan-800/40 space-y-2">
+            <span class="text-xs font-bold text-cyan-300">اختبار هوية الغاز المتصاعد (منهج أول متوسط):</span>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="testGasCandle()" class="p-2 rounded-lg bg-slate-900 border border-slate-700 hover:border-amber-500 text-right text-xs">
+                <div class="font-bold text-amber-300">1. تقريب عود ثقاب مشتعل 🔥</div>
+                <div id="candle-res" class="text-[10px] text-slate-400 mt-0.5">انقري لتقريب اللهب</div>
+              </button>
+              <button onclick="testGasLimewater()" class="p-2 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-500 text-right text-xs">
+                <div class="font-bold text-cyan-300">2. ماء الجير الرائق 🥛</div>
+                <div id="lime-res" class="text-[10px] text-slate-400 mt-0.5">انقري لتمرير الغاز</div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 space-y-4">
+          <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5">
+            <h4 class="text-sm font-bold text-slate-200 mb-2">المعادلة الكيميائية:</h4>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 font-mono text-center text-xs text-cyan-300 dir-ltr">
+              NaHCO₃ + CH₃COOH → CH₃COONa + H₂O + CO₂↑
+            </div>
+          </div>
+          <div class="bg-gradient-to-br from-indigo-950/50 to-slate-900 border border-indigo-800/40 rounded-2xl p-5 space-y-2">
+            <span class="text-xs font-bold text-purple-300">الاستنتاج العلمي:</span>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              هذا التفاعل <strong class="text-amber-300">تغير كيميائي</strong> ينتج مادة جديدة هي غاز ثاني أكسيد الكربون (CO₂) الذي أدى إلى انتفاخ البالون وفوران السائل.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Experiment 3: States of Matter Container -->
+      <div id="exp-container-matter" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-7 bg-slate-900/60 border border-slate-800 rounded-2xl p-6 backdrop-blur-md flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-4">
+            <span id="matter-state-name" class="text-sm font-bold text-cyan-400">الحالة الصلبة (جليد: -10°C)</span>
+            <button onclick="resetMatterExperiment()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs">إعادة الضبط</button>
+          </div>
+
+          <div class="relative py-8 flex flex-col items-center justify-center min-h-[320px]">
+            <div class="w-48 h-48 border-2 border-slate-400/50 rounded-b-2xl bg-slate-950/40 flex flex-col justify-end p-2 relative overflow-hidden">
+              <div id="matter-visual" class="w-full h-24 flex items-center justify-center text-2xl">
+                ❄️ ❄️ ❄️
+              </div>
+            </div>
+            <!-- Tripod and burner -->
+            <div class="w-44 h-2 bg-slate-600 mt-1"></div>
+            <div id="flame" class="hidden w-4 h-10 bg-cyan-400 rounded-t-full mt-2 animate-flame"></div>
+            <div class="w-6 h-12 bg-slate-400"></div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-800 flex justify-between items-center">
+            <span class="text-xs text-slate-300">درجة الحرارة: <strong id="matter-temp" class="text-rose-400 font-mono text-sm">-10°C</strong></span>
+            <div class="flex gap-2">
+              <button onclick="toggleBurner(false)" class="px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-bold">إطفاء</button>
+              <button onclick="toggleBurner(true)" class="px-3 py-1.5 rounded-lg bg-cyan-600 text-white text-xs font-bold">إشعال موقد بنسن 🔥</button>
+              <button onclick="coolWithIce()" class="px-3 py-1.5 rounded-lg bg-cyan-950 border border-cyan-700 text-cyan-300 text-xs font-bold">تبريد بثلج 🧊</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 space-y-4">
+          <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5">
+            <h4 class="text-sm font-bold text-slate-200 mb-2">النقاط الحرارية للماء:</h4>
+            <div class="space-y-2 text-xs">
+              <div class="p-2 bg-slate-950 rounded flex justify-between"><span>الانصهار (تحول لماء سائل)</span><strong class="text-cyan-400">0°C</strong></div>
+              <div class="p-2 bg-slate-950 rounded flex justify-between"><span>الغليان والتبخر (تحول لبخار)</span><strong class="text-amber-400">100°C</strong></div>
+            </div>
+          </div>
+          <div class="bg-gradient-to-br from-purple-950/50 to-slate-900 border border-purple-800/40 rounded-2xl p-5 space-y-2">
+            <span class="text-xs font-bold text-cyan-300">الاستنتاج العلمي:</span>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              تحول الجليد إلى ماء ثم بخار يُعد <strong class="text-cyan-300">تغيراً فيزيائياً</strong>؛ لأن هوية جزيئات الماء (H₂O) لم تتغير، بل تغيرت طاقتها الحركية والمسافات بين الجزيئات فقط.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SECTION 2: Quiz Quest -->
+    <div id="section-quiz" class="hidden max-w-4xl mx-auto space-y-6">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-white">تحدي الكيمياء الذكي (الصف الأول متوسط)</h3>
+          <span class="text-xs px-3 py-1 rounded-full bg-purple-950 text-purple-300 font-mono">النقاط: <strong id="quiz-score-val">0</strong> / 5</span>
+        </div>
+
+        <div id="quiz-question-box" class="space-y-4">
+          <p id="quiz-q-text" class="text-base sm:text-lg font-bold text-white"></p>
+          <div id="quiz-options-box" class="space-y-2.5"></div>
+          <div id="quiz-explanation-box" class="hidden p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300"></div>
+          <button id="quiz-next-btn" onclick="nextQuizQuestion()" class="hidden px-5 py-2.5 rounded-xl bg-purple-600 text-white font-bold text-xs">السؤال التالي</button>
+        </div>
+
+        <div id="quiz-finish-box" class="hidden text-center py-8 space-y-4">
+          <div class="w-20 h-20 mx-auto rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-3xl">
+            🏆
+          </div>
+          <h4 class="text-2xl font-black text-white">كيميائية المستقبل المبدعة 🌟</h4>
+          <p class="text-sm text-slate-300">تهانينا! لقد أنهيتِ تحدي أسبوع الكيمياء بنجاح واقتدار.</p>
+          <div class="flex justify-center gap-2">
+            <button onclick="toggleQuizReview()" class="px-5 py-2.5 rounded-xl bg-purple-900/60 hover:bg-purple-800 border border-purple-700 text-purple-200 text-xs font-bold">مراجعة الإجابات النموذجية 💡</button>
+            <button onclick="restartQuiz()" class="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs">إعادة التحدي</button>
+          </div>
+          <div id="quiz-review-list" class="hidden text-right space-y-2 mt-4 pt-4 border-t border-slate-800 text-xs"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Facts -->
+    <div id="section-facts" class="hidden space-y-6">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5">
+        <h3 class="text-xl font-black text-white">حقائق كيميائية ممتعة في حياتنا اليومية</h3>
+        <p class="text-xs text-slate-300 mt-1">انقري على البطاقات لقلبها واكتشاف التفسير العلمي الممتع!</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div onclick="this.classList.toggle('rotate-y-180')" class="h-64 perspective-1000 cursor-pointer transform-style-3d duration-500 relative">
+          <div class="absolute inset-0 backface-hidden rounded-2xl p-6 bg-slate-900 border border-amber-500/40 flex flex-col justify-between">
+            <span class="text-3xl">🧅</span>
+            <h4 class="text-base font-bold text-white">لماذا يبكينا البصل عند تقطيعه؟</h4>
+            <span class="text-xs text-amber-400">انقري لاكتشاف السر الكيميائي ↻</span>
+          </div>
+          <div class="absolute inset-0 backface-hidden rotate-y-180 rounded-2xl p-6 bg-purple-950 border border-purple-500/40 flex flex-col justify-between">
+            <p class="text-xs text-slate-200 leading-relaxed">عند تقطيع البصل تنطلق مركبات كبريتية تطير في الهواء وتتحول مع رطوبة العين إلى كميات مجهرية من حمض الكبريتيك المخفف، فتفرز العين الدموع لغسيل نفسها!</p>
+            <span class="text-[10px] text-purple-300">كيمياء الحياة اليومية</span>
+          </div>
+        </div>
+
+        <div onclick="this.classList.toggle('rotate-y-180')" class="h-64 perspective-1000 cursor-pointer transform-style-3d duration-500 relative">
+          <div class="absolute inset-0 backface-hidden rounded-2xl p-6 bg-slate-900 border border-cyan-500/40 flex flex-col justify-between">
+            <span class="text-3xl">🧊</span>
+            <h4 class="text-base font-bold text-white">لماذا يطفو الجليد فوق الماء؟</h4>
+            <span class="text-xs text-cyan-400">انقري لاكتشاف السر الكيميائي ↻</span>
+          </div>
+          <div class="absolute inset-0 backface-hidden rotate-y-180 rounded-2xl p-6 bg-purple-950 border border-purple-500/40 flex flex-col justify-between">
+            <p class="text-xs text-slate-200 leading-relaxed">جزيئات الماء عند تجمدها تترتب في شبكة سداسية بلورية واسعة، مما يقلل من كثافتها مقارنة بالماء السائل فتطفو لحماية الكائنات البحرية تحتها!</p>
+            <span class="text-[10px] text-cyan-300">خاصية شذوذ كثافة الماء</span>
+          </div>
+        </div>
+
+        <div onclick="this.classList.toggle('rotate-y-180')" class="h-64 perspective-1000 cursor-pointer transform-style-3d duration-500 relative">
+          <div class="absolute inset-0 backface-hidden rounded-2xl p-6 bg-slate-900 border border-rose-500/40 flex flex-col justify-between">
+            <span class="text-3xl">🎂</span>
+            <h4 class="text-base font-bold text-white">كيف ينفش الكيك بالبيكنج باودر؟</h4>
+            <span class="text-xs text-rose-400">انقري لاكتشاف السر الكيميائي ↻</span>
+          </div>
+          <div class="absolute inset-0 backface-hidden rotate-y-180 rounded-2xl p-6 bg-purple-950 border border-purple-500/40 flex flex-col justify-between">
+            <p class="text-xs text-slate-200 leading-relaxed">يتفاعل مسحوق الخبز بالحرارة لإنتاج ملايين الفقاعات من غاز ثاني أكسيد الكربون (CO₂)، فتحبسها شبكة العجين وتنتفخ لتصبح هشة!</p>
+            <span class="text-[10px] text-rose-300">تفاعلات إنتاج الغازات</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Mandatory Branded Footer -->
+  <footer class="mt-16 border-t border-purple-900/40 bg-gradient-to-b from-[#0b0f19] to-[#070a12] py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="rounded-2xl p-6 bg-slate-900/80 border border-purple-500/30 flex flex-col md:flex-row items-center justify-between gap-4">
+        
+        <div>
+          <h4 class="text-base font-black text-white">معمل الجود الذكي للكيمياء</h4>
+          <p class="text-xs text-purple-300">مبادرة أسبوع الكيمياء المدرسي 2026</p>
+        </div>
+
+        <div class="space-y-1 text-xs text-slate-300 text-center md:text-right">
+          <div><strong class="text-white">مشاركة الطالبة:</strong> <span class="text-cyan-300 font-bold">الجود آل بوعينين</span> | الصف: <span class="text-purple-300 font-bold">أول / ٣</span></div>
+          <div><strong class="text-white">إشراف المعلمة:</strong> <span class="text-amber-300 font-bold">أ. سحر الشمري</span></div>
+          <div><strong class="text-white">المناسبة:</strong> <span class="text-emerald-400 font-bold">فعاليات أسبوع الكيمياء المدرسي</span></div>
+        </div>
+
+        <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="px-4 py-2 rounded-xl bg-slate-800 text-xs font-bold text-slate-300 hover:text-white">
+          العودة للأعلى ↑
+        </button>
+
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    let isMuted = false;
+
+    function getAudioCtx() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function toggleMute() {
+      isMuted = !isMuted;
+      document.getElementById('sound-btn').innerHTML = isMuted
+        ? '<i data-lucide="volume-x" class="w-5 h-5 text-rose-400"></i>'
+        : '<i data-lucide="volume-2" class="w-5 h-5 text-cyan-400"></i>';
+      lucide.createIcons();
+    }
+
+    function playSoundTone(freq, dur) {
+      if (isMuted) return;
+      try {
+        const ctx = getAudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + dur);
+      } catch (e) {}
+    }
+
+    // Main Tab Switching
+    function switchMainTab(tab) {
+      playSoundTone(600, 0.05);
+      ['lab', 'quiz', 'facts'].forEach(t => {
+        document.getElementById(`section-${t}`).classList.add('hidden');
+        const btn = document.getElementById(`tab-btn-${t}`);
+        btn.className = 'tab-btn flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200';
+      });
+      document.getElementById(`section-${tab}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-btn-${tab}`);
+      activeBtn.className = 'tab-btn flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md';
+    }
+
+    // Lab Experiment Switching
+    function switchExperiment(exp) {
+      playSoundTone(550, 0.05);
+      ['ph', 'gas', 'matter'].forEach(e => {
+        document.getElementById(`exp-container-${e}`).classList.add('hidden');
+        document.getElementById(`exp-tab-${e}`).className = 'px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-950 text-slate-300 hover:text-white border border-slate-800';
+      });
+      document.getElementById(`exp-container-${exp}`).classList.remove('hidden');
+      document.getElementById(`exp-tab-${exp}`).className = 'px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md';
+    }
+
+    // PH Experiment State
+    let currentPHCat = 'acid';
+    function selectPHSubstance(name, ph, color, category, title) {
+      playSoundTone(700, 0.08);
+      currentPHCat = category;
+      document.getElementById('ph-substance-title').innerText = title;
+      document.getElementById('ph-fluid').style.backgroundColor = color;
+      document.getElementById('ph-badge').innerText = `pH ${ph}`;
+      document.getElementById('litmus-result-msg').innerText = '';
+    }
+
+    function dipLitmus(type) {
+      playSoundTone(800, 0.1);
+      const msg = document.getElementById('litmus-result-msg');
+      if (currentPHCat === 'حمض قوي' || currentPHCat === 'حمض متوسط') {
+        msg.innerText = type === 'blue' ? '✓ تحولت الورقة الزرقاء إلى الحمراء (دليل حمضي مؤكد) 🔴' : '✓ بقيت الورقة حمراء كما هي (المحلول حمضي) 🔴';
+        msg.className = 'text-xs font-bold text-center text-rose-400 min-h-[16px] animate-pulse';
+      } else if (currentPHCat === 'قاعدة خفيفة' || currentPHCat === 'قاعدة متوسطة' || currentPHCat === 'قاعدة قوية') {
+        msg.innerText = type === 'red' ? '✓ تحولت الورقة الحمراء إلى الزرقاء (دليل قاعدي مؤكد) 🔵' : '✓ بقيت الورقة زرقاء كما هي (المحلول قاعدي) 🔵';
+        msg.className = 'text-xs font-bold text-center text-cyan-400 min-h-[16px] animate-pulse';
+      } else {
+        msg.innerText = '✓ لم يتغير لون الورقة لأن المحلول متعادل كيميائياً (pH=7.0)';
+        msg.className = 'text-xs font-bold text-center text-purple-300 min-h-[16px]';
+      }
+    }
+
+    function addPHDrop() {
+      playSoundTone(850, 0.1);
+      const fluid = document.getElementById('ph-fluid');
+      fluid.style.transform = 'scaleY(1.05)';
+      setTimeout(() => { fluid.style.transform = 'scaleY(1)'; }, 300);
+    }
+
+    function resetPHExperiment() {
+      selectPHSubstance('water', 7.0, 'rgba(147, 51, 234, 0.85)', 'متعادل', 'ماء نقي مقطر');
+      document.getElementById('litmus-result-msg').innerText = '';
+    }
+
+    // Gas Effervescence State
+    let isReacting = false;
+    function triggerGasReaction() {
+      if (isReacting) return;
+      isReacting = true;
+      playSoundTone(400, 0.2);
+      document.getElementById('gas-status').innerText = 'فوران وتصاعد غاز CO₂...';
+      const balloon = document.getElementById('balloon');
+      balloon.style.width = '120px';
+      balloon.style.height = '140px';
+      balloon.innerHTML = 'CO₂ غاز';
+      setTimeout(() => {
+        document.getElementById('gas-status').innerText = 'اكتمل إنتاج الغاز!';
+        document.getElementById('gas-tests-box').classList.remove('hidden');
+      }, 2500);
+    }
+
+    function resetGasReaction() {
+      isReacting = false;
+      document.getElementById('gas-status').innerText = 'جاهز للإضافة';
+      document.getElementById('gas-tests-box').classList.add('hidden');
+      document.getElementById('candle-res').innerText = 'انقري لتقريب اللهب';
+      document.getElementById('lime-res').innerText = 'انقري لتمرير الغاز';
+      const balloon = document.getElementById('balloon');
+      balloon.style.width = '48px';
+      balloon.style.height = '56px';
+      balloon.innerHTML = '';
+    }
+
+    function testGasCandle() {
+      playSoundTone(300, 0.15);
+      document.getElementById('candle-res').innerText = '🔥 انطفأ اللهب فوراً! (CO₂ لا يشتعل)';
+      document.getElementById('candle-res').className = 'text-[10px] text-amber-300 font-bold mt-0.5 animate-pulse';
+    }
+
+    function testGasLimewater() {
+      playSoundTone(500, 0.15);
+      document.getElementById('lime-res').innerText = '🥛 تعكر ماء الجير لراسب حليبي CaCO₃!';
+      document.getElementById('lime-res').className = 'text-[10px] text-cyan-300 font-bold mt-0.5 animate-pulse';
+    }
+
+    function coolWithIce() {
+      playSoundTone(800, 0.1);
+      toggleBurner(false);
+      matterTemp = -10;
+      updateMatterState();
+    }
+
+    // Matter States
+    let burnerOn = false;
+    let matterTemp = -10;
+    let burnerInterval = null;
+
+    function toggleBurner(on) {
+      burnerOn = on;
+      const flame = document.getElementById('flame');
+      if (on) {
+        playSoundTone(220, 0.3);
+        flame.classList.remove('hidden');
+        if (!burnerInterval) {
+          burnerInterval = setInterval(() => {
+            if (matterTemp < 105) {
+              matterTemp += 3;
+              updateMatterState();
+            }
+          }, 300);
+        }
+      } else {
+        flame.classList.add('hidden');
+        clearInterval(burnerInterval);
+        burnerInterval = null;
+      }
+    }
+
+    function updateMatterState() {
+      document.getElementById('matter-temp').innerText = `${matterTemp}°C`;
+      const vis = document.getElementById('matter-visual');
+      const name = document.getElementById('matter-state-name');
+      if (matterTemp < 0) {
+        vis.innerHTML = '❄️ ❄️ ❄️';
+        name.innerText = `الحالة الصلبة (جليد: ${matterTemp}°C)`;
+        name.className = 'text-sm font-bold text-cyan-400';
+      } else if (matterTemp < 100) {
+        vis.innerHTML = '💧 💧 💧';
+        name.innerText = `الحالة السائلة (ماء: ${matterTemp}°C)`;
+        name.className = 'text-sm font-bold text-blue-400';
+      } else {
+        vis.innerHTML = '♨️ ♨️ ♨️';
+        name.innerText = `الحالة الغازية (بخار وغليان: ${matterTemp}°C)`;
+        name.className = 'text-sm font-bold text-amber-400';
+      }
+    }
+
+    function resetMatterExperiment() {
+      toggleBurner(false);
+      matterTemp = -10;
+      updateMatterState();
+    }
+
+    // Quiz Quest
+    const quizQuestions = [
+      {
+        q: 'عند تقطيع ثمرة تفاحة وتركها في الهواء يتحول لونها إلى البني، يعد هذا التغير:',
+        options: ['تغير كيميائي (تكونت مادة جديدة نتيجة أكسدة الإنزيمات)', 'تغير فيزيائي فقط', 'عملية انصهار', 'تبخر جزيئات'],
+        correct: 0,
+        exp: 'تحول لون التفاح ناتج عن تفاعل كيميائي مع أكسجين الهواء مكوناً صبغة بنية جديدة.'
+      },
+      {
+        q: 'الحالة التي تأخذ فيها المادة شكل الإناء ولكن حجمها يظل ثابتاً هي:',
+        options: ['الحالة الصلبة', 'الحالة السائلة', 'الحالة الغازية', 'البلازما'],
+        correct: 1,
+        exp: 'السوائل لها حجم محدد وثابت وتأخذ شكل الإناء الحاوي لها.'
+      },
+      {
+        q: 'أصغر جزء من العنصر يحتفظ بجميع خصائص ذلك العنصر يُسمى:',
+        options: ['المخلوط', 'المركب', 'الذرة (Atom)', 'المحلول'],
+        correct: 2,
+        exp: 'الذرة هي الوحدة الأساسية لبناء العناصر الكيميائية.'
+      },
+      {
+        q: 'عند غمس ورقة تباع الشمس الحمراء في محلول صابوني، فإن لونها يتحول إلى:',
+        options: ['اللون الأزرق (لأنه محلول قاعدي)', 'اللون الأحمر الفاقع', 'اللون الأصفر', 'لا يتغير'],
+        correct: 0,
+        exp: 'القواعد تحول ورقة تباع الشمس الحمراء إلى اللون الأزرق.'
+      },
+      {
+        q: 'يُعد ماء البحر المالح مثالاً علمياً على:',
+        options: ['مخلوط غير متجانس', 'مخلوط متجانس (محلول)', 'عنصر نقي', 'تغير كيميائي معقد'],
+        correct: 1,
+        exp: 'المحلول مخلوط متجانس تنتظم فيه دقائق المذاب في المذيب.'
+      }
+    ];
+
+    let currentQIdx = 0;
+    let quizScore = 0;
+
+    function renderQuiz() {
+      const q = quizQuestions[currentQIdx];
+      document.getElementById('quiz-q-text').innerText = `${currentQIdx + 1}. ${q.q}`;
+      const optBox = document.getElementById('quiz-options-box');
+      optBox.innerHTML = '';
+      document.getElementById('quiz-explanation-box').classList.add('hidden');
+      document.getElementById('quiz-next-btn').classList.add('hidden');
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'w-full p-3.5 rounded-xl border border-slate-800 bg-slate-950 text-right text-xs font-semibold text-slate-200 hover:border-purple-500 transition-all';
+        btn.innerText = opt;
+        btn.onclick = () => selectQuizAnswer(idx);
+        optBox.appendChild(btn);
+      });
+    }
+
+    function selectQuizAnswer(idx) {
+      const q = quizQuestions[currentQIdx];
+      const optBtns = document.getElementById('quiz-options-box').children;
+      for (let b of optBtns) b.disabled = true;
+
+      if (idx === q.correct) {
+        playSoundTone(900, 0.2);
+        optBtns[idx].className += ' bg-emerald-950 border-emerald-500 text-emerald-200';
+        quizScore++;
+        document.getElementById('quiz-score-val').innerText = quizScore;
+      } else {
+        playSoundTone(250, 0.2);
+        optBtns[idx].className += ' bg-rose-950 border-rose-500 text-rose-200';
+        optBtns[q.correct].className += ' bg-emerald-950 border-emerald-500 text-emerald-200';
+      }
+
+      const expBox = document.getElementById('quiz-explanation-box');
+      expBox.innerText = q.exp;
+      expBox.classList.remove('hidden');
+      document.getElementById('quiz-next-btn').classList.remove('hidden');
+    }
+
+    function nextQuizQuestion() {
+      if (currentQIdx < quizQuestions.length - 1) {
+        currentQIdx++;
+        renderQuiz();
+      } else {
+        document.getElementById('quiz-question-box').classList.add('hidden');
+        document.getElementById('quiz-finish-box').classList.remove('hidden');
+        if (typeof confetti === 'function') {
+          confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        }
+      }
+    }
+
+    function restartQuiz() {
+      currentQIdx = 0;
+      quizScore = 0;
+      document.getElementById('quiz-score-val').innerText = '0';
+      document.getElementById('quiz-question-box').classList.remove('hidden');
+      document.getElementById('quiz-finish-box').classList.add('hidden');
+      renderQuiz();
+    }
+
+    function toggleQuizReview() {
+      const box = document.getElementById('quiz-review-list');
+      if (!box.classList.contains('hidden')) {
+        box.classList.add('hidden');
+        return;
+      }
+      box.innerHTML = '';
+      quizQuestions.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1';
+        div.innerHTML = `
+          <div class="font-bold text-white">${idx + 1}. ${item.q}</div>
+          <div class="text-emerald-400 font-semibold text-[11px]">الإجابة النموذجية: ${item.options[item.correct]}</div>
+          <div class="text-slate-400 text-[10px] bg-slate-950 p-2 rounded">${item.exp}</div>
+        `;
+        box.appendChild(div);
+      });
+      box.classList.remove('hidden');
+    }
+
+    // Initialize
+    lucide.createIcons();
+    renderQuiz();
+  </script>
+</body>
+</html>
